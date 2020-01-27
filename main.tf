@@ -1,8 +1,9 @@
 locals {
+  stage            = (var.stage != "" ? var.stage : terraform.workspace)
   host_suffix      = "${var.zone}.${var.env}.${var.stage}"
   host_full_suffix = "${local.host_suffix}.${var.domain}"
   /* got to add some default groups */
-  groups = distinct([var.zone, "${var.env}.${var.stage}", var.group])
+  groups = distinct([var.zone, "${var.env}.${local.stage}", var.group])
   /* always add SSH, Tinc, Netdata, and Consul to allowed ports */
   open_tcp_ports  = concat(["22", "655", "8000", "8301"], var.open_tcp_ports)
   open_udp_ports  = concat(["8301"], var.open_udp_ports)
@@ -19,7 +20,7 @@ data "aws_ami" "ubuntu" {
 }
 
 resource "aws_security_group" "host" {
-  name        = "default-${var.zone}-${var.env}-${var.stage}"
+  name        = "default-${var.zone}-${var.env}-${local.stage}"
   description = "Allow SSH and other ports. (Terraform)"
 
   /* unrestricted outging traffic */
@@ -69,12 +70,12 @@ resource "aws_instance" "host" {
   tags = {
     Name  = "node-${format("%02d", count.index+1)}.${local.host_suffix}"
     Fqdn  = "node-${format("%02d", count.index+1)}.${local.host_full_suffix}"
-    Fleet = "${var.env}.${var.stage}"
+    Fleet = "${var.env}.${local.stage}"
   }
   
   /* for snapshots through lifecycle policy */
   volume_tags = {
-    Fleet = "${var.env}.${var.stage}"
+    Fleet = "${var.env}.${local.stage}"
   }
 
   /* bootstraping access for later Ansible use */
@@ -92,7 +93,7 @@ resource "aws_instance" "host" {
         ansible_ssh_user = var.ssh_user
         data_center      = var.zone
         env              = var.env
-        stage            = var.stage
+        stage            = local.stage
       }
     }
   }
@@ -138,6 +139,6 @@ resource "ansible_host" "host" {
     dns_domain   = var.domain
     data_center  = var.zone
     env          = var.env
-    stage        = var.stage
+    stage        = local.stage
   }
 }
