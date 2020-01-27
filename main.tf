@@ -44,8 +44,13 @@ resource "aws_security_group" "host" {
     iterator = port
     for_each = local.open_tcp_ports
     content {
-      from_port = port.value
-      to_port   = port.value
+      /* Hacky way to handle ranges as strings */
+      from_port = tonumber(
+        length(split("-", port.value)) > 1 ? split("-", port.value)[0] : port.value
+      )
+      to_port = tonumber(
+        length(split("-", port.value)) > 1 ? split("-", port.value)[1] : port.value
+      )
       protocol  = "tcp"
       cidr_blocks = ["0.0.0.0/0"]
     }
@@ -56,8 +61,13 @@ resource "aws_security_group" "host" {
     iterator = port
     for_each = local.open_udp_ports
     content {
-      from_port = port.value
-      to_port   = port.value
+      /* Hacky way to handle ranges as strings */
+      from_port = tonumber(
+        length(split("-", port.value)) > 1 ? split("-", port.value)[0] : port.value
+      )
+      to_port = tonumber(
+        length(split("-", port.value)) > 1 ? split("-", port.value)[1] : port.value
+      )
       protocol  = "udp"
       cidr_blocks = ["0.0.0.0/0"]
     }
