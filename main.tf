@@ -39,6 +39,7 @@ resource "aws_security_group" "host" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  /* TCP */
   dynamic "ingress" {
     iterator = port
     for_each = local.open_tcp_ports
@@ -46,6 +47,18 @@ resource "aws_security_group" "host" {
       from_port = port.value
       to_port   = port.value
       protocol  = "tcp"
+      cidr_blocks = ["0.0.0.0/0"]
+    }
+  }
+
+  /* UDP */
+  dynamic "ingress" {
+    iterator = port
+    for_each = local.open_udp_ports
+    content {
+      from_port = port.value
+      to_port   = port.value
+      protocol  = "udp"
       cidr_blocks = ["0.0.0.0/0"]
     }
   }
