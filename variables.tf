@@ -79,11 +79,13 @@ variable keypair_name {
 variable open_tcp_ports {
   description = "Which TCP ports should be opened on the firewal."
   type        = list(number)
+  default     = []
 }
 
 variable open_udp_ports {
   description = "Which UDP ports should be opened on the firewal."
   type        = list(number)
+  default     = []
 }
 
 /* SPECIFIC -------------------------------------*/
