@@ -1,6 +1,6 @@
 locals {
   stage            = (var.stage != "" ? var.stage : terraform.workspace)
-  host_suffix      = "${var.zone}.${var.env}.${var.stage}"
+  host_suffix      = "${var.provider_name}-${var.zone}.${var.env}.${var.stage}"
   host_full_suffix = "${local.host_suffix}.${var.domain}"
   /* got to add some default groups */
   groups = distinct([var.zone, "${var.env}.${local.stage}", var.group])

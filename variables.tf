@@ -90,6 +90,12 @@ variable open_udp_ports {
 
 /* SPECIFIC -------------------------------------*/
 
+variable provider_name {
+  description = "Short name of provider being used."
+  # Amazon Web Services
+  default     = "aws"
+}
+
 variable name {
   description = "Prefix of hostname before index."
   default     = "node"
