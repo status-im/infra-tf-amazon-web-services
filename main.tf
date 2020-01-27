@@ -133,8 +133,8 @@ resource "aws_ebs_volume" "host" {
 
 resource "aws_volume_attachment" "host" {
   device_name = "/dev/sdf"
-  volume_id   = aws_ebs_volume.host.0.id
-  instance_id = aws_instance.host.id
+  volume_id   = aws_ebs_volume.host[count.index].id
+  instance_id = aws_instance.host[count.index].id
 
   count = (var.data_vol_size == 0 ? 0 : 1)
 }
