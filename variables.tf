@@ -97,7 +97,7 @@ variable name {
 
 variable group {
   description = "Name of Ansible group"
-  type        = list(string)
+  type        = string
 }
 
 variable env {
