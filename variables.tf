@@ -88,7 +88,7 @@ variable open_udp_ports {
 
 /* SPECIFIC -------------------------------------*/
 
-variable groups {
+variable group {
   description = "Name of Ansible group"
   type        = list(string)
 }

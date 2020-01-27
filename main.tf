@@ -2,7 +2,7 @@ locals {
   host_suffix      = "${var.zone}.${var.env}.${var.stage}"
   host_full_suffix = "${local.host_suffix}.${var.domain}"
   /* got to add some default groups */
-  groups = distinct(concat([var.zone, "${var.env}.${var.stage}"], var.groups))
+  groups = distinct([var.zone, "${var.env}.${var.stage}", var.group])
   /* always add SSH, Tinc, Netdata, and Consul to allowed ports */
   open_tcp_ports  = concat(["22", "655", "8000", "8301"], var.open_tcp_ports)
   open_udp_ports  = concat(["8301"], var.open_udp_ports)
