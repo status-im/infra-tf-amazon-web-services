@@ -41,7 +41,7 @@ variable data_vol_type {
 variable image_name {
   description = "Name of AMI image to use."
   type        = string
-  default     = "ubuntu/images/hvm-ssd/ubuntu-bionic-18.04-amd64-server-20190212.1"
+  default     = "ubuntu/images/hvm-ssd/ubuntu-bionic-18.04-amd64-server-20200112"
 }
 
 variable image_owner {
