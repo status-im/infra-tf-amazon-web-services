@@ -90,6 +90,11 @@ variable open_udp_ports {
 
 /* SPECIFIC -------------------------------------*/
 
+variable name {
+  description = "Prefix of hostname before index."
+  default     = "node"
+}
+
 variable group {
   description = "Name of Ansible group"
   type        = list(string)

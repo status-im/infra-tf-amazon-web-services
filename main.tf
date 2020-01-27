@@ -81,8 +81,8 @@ resource "aws_instance" "host" {
   }
 
   tags = {
-    Name  = "node-${format("%02d", count.index+1)}.${local.host_suffix}"
-    Fqdn  = "node-${format("%02d", count.index+1)}.${local.host_full_suffix}"
+    Name  = "${var.name}-${format("%02d", count.index+1)}.${local.host_suffix}"
+    Fqdn  = "${var.name}-${format("%02d", count.index+1)}.${local.host_full_suffix}"
     Fleet = "${var.env}.${local.stage}"
   }
   
