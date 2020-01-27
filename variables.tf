@@ -108,4 +108,5 @@ variable env {
 variable stage {
   description = "Name of stage, like prod, dev, or staging."
   type        = string
+  default     = ""
 }
