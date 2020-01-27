@@ -19,7 +19,7 @@ module "amazon-web-services" {
   * `host_count` - Number of hosts to start in this region.
   * `image_name` - OS image used to create host. (default: `ubuntu-bionic-18.04-amd64`)
   * `image_owner` - Idenitifier of AWS AMI image owner. (default: `099720109477`)
-  * `size` - Type of host to create. (default: `s-1vcpu-1gb`)
+  * `instance_type` - Type of host to create. (default: `t2.micro`)
   * `zone` - Availability Zone in which the instance will be created. (default: `eu-central-1a`)
   * `root_vol_size` - Size in GiB of system rot volume. (default: 10 GB)
   * `data_vol_size` - Size in GiB of an extra volume to attach to the instance. (default: 0)
