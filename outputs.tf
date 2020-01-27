@@ -1,6 +1,6 @@
 locals {
-  public_ips = aws_instance.main[*].public_ip
-  hostnames  = aws_instance.main[*].tags.Name
+  public_ips = aws_instance.host[*].public_ip
+  hostnames  = aws_instance.host[*].tags.Name
 }
 
 output "public_ips" {
@@ -16,5 +16,5 @@ output "hosts" {
 }
 
 output "instances" {
-  value = aws_instance.main
+  value = aws_instance.host
 }
