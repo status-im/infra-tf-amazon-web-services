@@ -132,6 +132,10 @@ resource "aws_ebs_volume" "host" {
   size = var.data_vol_size
   type = var.data_vol_type
 
+  tags = {
+    Name = "data-${aws_instance.host[count.index].tags.Name}"
+  }
+
   count = (var.data_vol_size == 0 ? 0 : 1)
 }
 
