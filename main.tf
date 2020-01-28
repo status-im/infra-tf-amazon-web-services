@@ -152,7 +152,7 @@ resource "cloudflare_record" "host" {
   name    = aws_instance.host[count.index].tags.Name
   value   = aws_instance.host[count.index].public_ip
   type    = "A"
-  ttl     = 3600
+  ttl     = 300
 }
 
 /* this adds the host to the Terraform state for Ansible inventory */
