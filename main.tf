@@ -88,10 +88,11 @@ resource "aws_instance" "host" {
   ami                    = data.aws_ami.ubuntu.id
   key_name               = var.keypair_name
   subnet_id              = var.subnet_id
-  /* Use provider Security Group if available */
-  vpc_security_group_ids = [
-    var.secgroup_id != "" ? var.secgroup_id : aws_security_group.host.id
-  ]
+  /* Add provided Security Group if available */
+  vpc_security_group_ids = concat(
+    [ aws_security_group.host.id ],
+    (var.secgroup_id != "" ? [var.secgroup_id] : [])
+  )
 
   root_block_device {
     volume_size = var.root_vol_size
