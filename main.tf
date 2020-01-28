@@ -103,6 +103,7 @@ resource "aws_instance" "host" {
   /* for snapshots through lifecycle policy */
   volume_tags = {
     Fleet = "${var.env}.${local.stage}"
+    Name = "data-${var.name}-${format("%02d", count.index+1)}.${local.host_suffix}"
   }
 
   /* bootstraping access for later Ansible use */
@@ -131,10 +132,6 @@ resource "aws_ebs_volume" "host" {
 
   size = var.data_vol_size
   type = var.data_vol_type
-
-  tags = {
-    Name = "data-${aws_instance.host[count.index].tags.Name}"
-  }
 
   count = (var.data_vol_size == 0 ? 0 : 1)
 }
