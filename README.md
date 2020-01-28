@@ -30,8 +30,9 @@ module "amazon-web-services" {
   * `env` - Environment for these hosts, affects DNS entries.
   * `domain` - DNS Domain to update.
 * __Security__
-  * `vpc_id` - ID of the AWS VPC for instances.
-  * `subnet_id` - ID of the AWS Subnet for instances.
+  * `vpc_id` - ID of the VPC for instances.
+  * `subnet_id` - ID of the Subnet for instances.
+  * `secgroup_id` - ID of the Security Group for instances.
   * `keypair_name` - User used to log in to instance (default: `root`)
   * `open_tcp_ports` - TCP port ranges to enable access from outside. Format: `N-N` (default: `[]`)
   * `open_udp_ports` - UDP port ranges to enable access from outside. Format: `N-N` (default: `[]`)

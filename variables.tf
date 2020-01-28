@@ -86,6 +86,11 @@ variable subnet_id {
   type        = string
 }
 
+variable secgroup_id {
+  description = "ID of the Security Group for instances"
+  type        = string
+}
+
 /* FIREWQLL -------------------------------------*/
 
 variable open_tcp_ports {
