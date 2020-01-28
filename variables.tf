@@ -69,8 +69,20 @@ variable domain {
   type        = string
 }
 
+/* SECURITY -------------------------------------*/
+
 variable keypair_name {
   description = "Name of SSH key pair in AWS."
+  type        = string
+}
+
+variable vpc_id {
+  description = "ID of the VPC for instances"
+  type        = string
+}
+
+variable subnet_id {
+  description = "ID of the Subnet for instances"
   type        = string
 }
 

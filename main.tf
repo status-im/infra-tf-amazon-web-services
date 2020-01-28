@@ -23,6 +23,9 @@ resource "aws_security_group" "host" {
   name        = "default-${var.zone}-${var.env}-${local.stage}"
   description = "Allow SSH and other ports. (Terraform)"
 
+  /* needs to exist in VPC of the instance */
+  vpc_id = var.vpc_id
+
   /* unrestricted outging traffic */
   egress {
     from_port   = 0
@@ -84,6 +87,7 @@ resource "aws_instance" "host" {
 
   ami                    = data.aws_ami.ubuntu.id
   key_name               = var.keypair_name
+  subnet_id              = var.subnet_id
   vpc_security_group_ids = [aws_security_group.host.id]
 
   root_block_device {
