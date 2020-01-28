@@ -2,6 +2,7 @@
 
 variable cf_zone_id {
   description = "ID of CloudFlare zone for host record."
+  type        = string
   /* We default to: statusim.net */
   default     = "14660d10344c9898521c4ba49789f563"
 }
@@ -11,6 +12,7 @@ variable cf_zone_id {
 variable host_count {
   description = "Number of instances to create."
   type        = number
+  default     = 1
 }
 
 variable instance_type {
@@ -21,11 +23,13 @@ variable instance_type {
 
 variable root_vol_size {
   description = "Size in GiB of OS root volume."
+  type        = number
   default     = 10
 }
 
 variable data_vol_size {
   description = "Size in GiB of OS root volume."
+  type        = number
   /* 0 in this case means no extra data volume */
   default     = 0
 }
@@ -109,12 +113,14 @@ variable open_udp_ports {
 
 variable provider_name {
   description = "Short name of provider being used."
+  type        = string
   # Amazon Web Services
   default     = "aws"
 }
 
 variable name {
   description = "Prefix of hostname before index."
+  type        = string
   default     = "node"
 }
 
