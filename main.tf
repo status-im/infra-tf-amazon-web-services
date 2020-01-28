@@ -20,7 +20,7 @@ data "aws_ami" "ubuntu" {
 }
 
 resource "aws_security_group" "host" {
-  name        = "default-${var.zone}-${var.env}-${local.stage}"
+  name        = "${var.name}-${var.zone}-${var.env}-${local.stage}"
   description = "Allow SSH and other ports. (Terraform)"
 
   /* needs to exist in VPC of the instance */
