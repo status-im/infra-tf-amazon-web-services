@@ -167,8 +167,8 @@ resource "ansible_host" "host" {
     hostname     = aws_instance.host[count.index].tags.Name
     region       = aws_instance.host[count.index].availability_zone
     dns_entry    = aws_instance.host[count.index].tags.Fqdn
+    data_center  = "${var.provider_name}-${var.zone}"
     dns_domain   = var.domain
-    data_center  = var.zone
     env          = var.env
     stage        = local.stage
   }
