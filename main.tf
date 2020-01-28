@@ -136,7 +136,7 @@ resource "aws_ebs_volume" "host" {
   size = var.data_vol_size
   type = var.data_vol_type
 
-  count = (var.data_vol_size == 0 ? 0 : 1)
+  count = (var.data_vol_size == 0 ? 0 : var.host_count)
 }
 
 resource "aws_volume_attachment" "host" {
@@ -144,11 +144,11 @@ resource "aws_volume_attachment" "host" {
   volume_id   = aws_ebs_volume.host[count.index].id
   instance_id = aws_instance.host[count.index].id
 
-  count = (var.data_vol_size == 0 ? 0 : 1)
+  count = (var.data_vol_size == 0 ? 0 : var.host_count)
 }
 resource "cloudflare_record" "host" {
   zone_id = var.cf_zone_id
-  count   = length(aws_instance.host)
+  count   = var.host_count
   name    = aws_instance.host[count.index].tags.Name
   value   = aws_instance.host[count.index].public_ip
   type    = "A"
