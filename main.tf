@@ -124,9 +124,9 @@ resource "aws_instance" "host" {
       extra_vars = {
         hostname         = self.tags.Name
         ansible_ssh_user = var.ssh_user
-        data_center      = var.zone
-        env              = var.env
+        data_center      = local.data_center
         stage            = local.stage
+        env              = var.env
       }
     }
   }
