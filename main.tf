@@ -1,9 +1,10 @@
 locals {
-  stage            = (var.stage != "" ? var.stage : terraform.workspace)
-  host_suffix      = "${var.provider_name}-${var.zone}.${var.env}.${local.stage}"
+  stage            = var.stage != "" ? var.stage : terraform.workspace
+  data_center      = "${var.provider_name}-${var.zone}"
+  host_suffix      = "${local.data_center}.${var.env}.${local.stage}"
   host_full_suffix = "${local.host_suffix}.${var.domain}"
   /* got to add some default groups */
-  groups = distinct([var.zone, "${var.env}.${local.stage}", var.group])
+  groups = distinct([local.data_center, "${var.env}.${local.stage}", var.group])
   /* always add SSH, Tinc, Netdata, and Consul to allowed ports */
   open_tcp_ports  = concat(["22", "655", "8000", "8301"], var.open_tcp_ports)
   open_udp_ports  = concat(["655", "8301"], var.open_udp_ports)
@@ -168,7 +169,7 @@ resource "ansible_host" "host" {
     hostname     = aws_instance.host[count.index].tags.Name
     region       = aws_instance.host[count.index].availability_zone
     dns_entry    = aws_instance.host[count.index].tags.Fqdn
-    data_center  = "${var.provider_name}-${var.zone}"
+    data_center  = local.data_center
     dns_domain   = var.domain
     env          = var.env
     stage        = local.stage
