@@ -1,13 +1,22 @@
 locals {
-  stage            = var.stage != "" ? var.stage : terraform.workspace
-  data_center      = "${var.provider_name}-${var.zone}"
-  host_suffix      = "${local.data_center}.${var.env}.${local.stage}"
-  host_full_suffix = "${local.host_suffix}.${var.domain}"
+  stage       = var.stage != "" ? var.stage : terraform.workspace
+  data_center = "${var.provider_name}-${var.region}"
   /* got to add some default groups */
   groups = distinct([local.data_center, "${var.env}.${local.stage}", var.group])
   /* always add SSH, Tinc, Netdata, and Consul to allowed ports */
   open_tcp_ports  = concat(["22", "655", "8000", "8301"], var.open_tcp_ports)
   open_udp_ports  = concat(["655", "8301"], var.open_udp_ports)
+  /* pre-generated list of hostnames */
+  hostnames = [for i in range(1, var.host_count+1): 
+    join(".", [
+      "${var.name}-${format("%02d", i)}",
+      "${var.provider_name}-${var.region}${element(var.zones, (i - 1) % length(var.zones))}",
+      var.env,
+      local.stage,
+    ])
+  ]
+  /* pre-generated map of zones to subnets */
+  subnets = {for s in var.subnets: s.availability_zone => s.id}
 }
 
 /* the image needs to be queried */
@@ -21,11 +30,11 @@ data "aws_ami" "ubuntu" {
 }
 
 resource "aws_security_group" "host" {
-  name        = "${var.name}-${var.zone}-${var.env}-${local.stage}"
+  name        = "${var.name}-${var.region}-${var.env}-${local.stage}"
   description = "Allow SSH and other ports. (Terraform)"
 
   /* needs to exist in VPC of the instance */
-  vpc_id = var.vpc_id
+  vpc_id = var.vpc.id
 
   /* unrestricted outging traffic */
   egress {
@@ -80,19 +89,20 @@ resource "aws_security_group" "host" {
 
 resource "aws_instance" "host" {
   instance_type     = var.instance_type
-  availability_zone = var.zone
+  availability_zone = "${var.region}${var.zones[count.index % length(var.zones)]}"
   count             = var.host_count
 
   /* necessary for SSH access */
   associate_public_ip_address = true
 
-  ami                    = data.aws_ami.ubuntu.id
-  key_name               = var.keypair_name
-  subnet_id              = var.subnet_id
+  ami       = data.aws_ami.ubuntu.id
+  key_name  = var.keypair_name
+  subnet_id = local.subnets["${var.region}${var.zones[count.index % length(var.zones)]}"]
+
   /* Add provided Security Group if available */
   vpc_security_group_ids = concat(
     [ aws_security_group.host.id ],
-    (var.secgroup_id != "" ? [var.secgroup_id] : [])
+    (var.secgroup.id != "" ? [var.secgroup.id] : [])
   )
 
   root_block_device {
@@ -100,15 +110,15 @@ resource "aws_instance" "host" {
   }
 
   tags = {
-    Name  = "${var.name}-${format("%02d", count.index+1)}.${local.host_suffix}"
-    Fqdn  = "${var.name}-${format("%02d", count.index+1)}.${local.host_full_suffix}"
+    Name  = local.hostnames[count.index]
+    Fqdn  = "${local.hostnames[count.index]}.${var.domain}"
     Fleet = "${var.env}.${local.stage}"
   }
   
   /* for snapshots through lifecycle policy */
   volume_tags = {
     Fleet = "${var.env}.${local.stage}"
-    Name = "${var.name}-${format("%02d", count.index+1)}.${local.host_suffix}"
+    Name = local.hostnames[count.index]
   }
 
   /* bootstraping access for later Ansible use */
@@ -133,7 +143,7 @@ resource "aws_instance" "host" {
 }
 
 resource "aws_ebs_volume" "host" {
-  availability_zone = var.zone
+  availability_zone = "${var.region}${var.zones[count.index % length(var.zones)]}"
 
   size = var.data_vol_size
   type = var.data_vol_type

@@ -1,6 +1,6 @@
 locals {
   public_ips = aws_instance.host[*].public_ip
-  hostnames  = aws_instance.host[*].tags.Name
+  host_names = aws_instance.host[*].tags.Name
 }
 
 output "public_ips" {
@@ -8,11 +8,11 @@ output "public_ips" {
 }
 
 output "hostnames" {
-  value = local.hostnames
+  value = local.host_names
 }
 
 output "hosts" {
-  value = zipmap(local.hostnames, local.public_ips)
+  value = zipmap(local.host_names, local.public_ips)
 }
 
 output "instances" {

@@ -62,10 +62,17 @@ variable ssh_user {
 
 /* HOSTING --------------------------------------*/
 
-variable zone {
-  description = "Name of availability zone to deploy to."
+variable region {
+  description = "Name of AWS region to deploy to."
   type        = string
-  default     = "eu-central-1a"
+  default     = "eu-central-1"
+}
+
+/* We iterate through this for each host in the group */
+variable zones {
+  description = "Suffixes of availability zones for the region."
+  type        = list(string)
+  default     = [ "a", "b", "c" ]
 }
 
 variable domain {
@@ -80,19 +87,25 @@ variable keypair_name {
   type        = string
 }
 
-variable vpc_id {
+variable vpc {
   description = "ID of the VPC for instances"
-  type        = string
+  type        = object({
+    id = string, arn = string, main_route_table_id = string, default_security_group_id = string,
+  })
 }
 
-variable subnet_id {
+variable subnets {
   description = "ID of the Subnet for instances"
-  type        = string
+  type        = list(object({
+    id = string, arn = string, cidr_block = string, availability_zone = string,
+  }))
 }
 
-variable secgroup_id {
+variable secgroup {
   description = "ID of the Security Group for instances"
-  type        = string
+  type = object({
+    id = string, arn = string, vpc_id = string, owner_id = string,
+  })
 }
 
 /* FIREWQLL -------------------------------------*/
