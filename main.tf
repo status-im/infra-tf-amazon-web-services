@@ -111,6 +111,11 @@ resource "aws_instance" "host" {
     Name = "${var.name}-${format("%02d", count.index+1)}.${local.host_suffix}"
   }
 
+  /* Ignore changes to disk image */
+  lifecycle {
+    ignore_changes = [ ami ]
+  }
+
   /* bootstraping access for later Ansible use */
   provisioner "ansible" {
     plays {
