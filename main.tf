@@ -82,13 +82,10 @@ resource "aws_instance" "host" {
   instance_type     = var.instance_type
   availability_zone = var.zone
   count             = var.host_count
+  ami               = data.aws_ami.ubuntu.id
+  key_name          = var.keypair_name
+  subnet_id         = var.subnet_id
 
-  /* necessary for SSH access */
-  associate_public_ip_address = true
-
-  ami                    = data.aws_ami.ubuntu.id
-  key_name               = var.keypair_name
-  subnet_id              = var.subnet_id
   /* Add provided Security Group if available */
   vpc_security_group_ids = concat(
     [ aws_security_group.host.id ],
@@ -115,8 +112,18 @@ resource "aws_instance" "host" {
   lifecycle {
     ignore_changes = [ ami ]
   }
+}
 
-  /* bootstraping access for later Ansible use */
+resource "aws_eip" "host" {
+  instance = aws_instance.host[count.index].id
+  count    = var.host_count
+
+  tags = {
+    Name = "${var.name}-${format("%02d", count.index+1)}.${local.host_suffix}"
+  }
+
+  /* bootstraping access for later Ansible use
+   * we do it here to use the Elastic IP */
   provisioner "ansible" {
     plays {
       playbook {
