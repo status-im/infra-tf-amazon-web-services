@@ -177,7 +177,7 @@ resource "ansible_host" "host" {
   count  = length(aws_instance.host)
 
   vars = {
-    ansible_host = aws_instance.host[count.index].public_ip
+    ansible_host = aws_eip.host[count.index].public_ip
     hostname     = aws_instance.host[count.index].tags.Name
     region       = aws_instance.host[count.index].availability_zone
     dns_entry    = aws_instance.host[count.index].tags.Fqdn
