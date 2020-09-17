@@ -114,6 +114,23 @@ resource "aws_instance" "host" {
   }
 }
 
+resource "aws_ebs_volume" "host" {
+  availability_zone = var.zone
+
+  size = var.data_vol_size
+  type = var.data_vol_type
+
+  count = (var.data_vol_size == 0 ? 0 : var.host_count)
+}
+
+resource "aws_volume_attachment" "host" {
+  device_name = "/dev/sdf"
+  volume_id   = aws_ebs_volume.host[count.index].id
+  instance_id = aws_instance.host[count.index].id
+
+  count = (var.data_vol_size == 0 ? 0 : var.host_count)
+}
+
 resource "aws_eip" "host" {
   instance = aws_instance.host[count.index].id
   count    = var.host_count
@@ -121,6 +138,9 @@ resource "aws_eip" "host" {
   tags = {
     Name = "${var.name}-${format("%02d", count.index+1)}.${local.host_suffix}"
   }
+
+  /* Data volume needs to be available for bootstrapping */
+  depends_on = [ aws_volume_attachment.host ]
 
   /* bootstraping access for later Ansible use
    * we do it here to use the Elastic IP */
@@ -144,22 +164,6 @@ resource "aws_eip" "host" {
   }
 }
 
-resource "aws_ebs_volume" "host" {
-  availability_zone = var.zone
-
-  size = var.data_vol_size
-  type = var.data_vol_type
-
-  count = (var.data_vol_size == 0 ? 0 : var.host_count)
-}
-
-resource "aws_volume_attachment" "host" {
-  device_name = "/dev/sdf"
-  volume_id   = aws_ebs_volume.host[count.index].id
-  instance_id = aws_instance.host[count.index].id
-
-  count = (var.data_vol_size == 0 ? 0 : var.host_count)
-}
 resource "cloudflare_record" "host" {
   zone_id = var.cf_zone_id
   count   = var.host_count
