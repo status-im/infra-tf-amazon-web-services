@@ -141,20 +141,37 @@ resource "aws_eip" "host" {
 
   /* Data volume needs to be available for bootstrapping */
   depends_on = [ aws_volume_attachment.host ]
+}
 
-  /* bootstraping access for later Ansible use
-   * we do it here to use the Elastic IP */
+/* Run Ansible here here to make use of the Elastic IP attached to the host. */
+resource "null_resource" "host" {
+  count = var.host_count
+
+  /* Trigger bootstrapping on host or public IP change. */
+  triggers = {
+    instance_id = aws_instance.host[count.index].id
+    eip_id = aws_eip.host[count.index].id
+  }
+
+  /* Make sure everything is in place before bootstrapping. */
+  depends_on = [
+    aws_instance.host[count.index]
+    aws_ebs_volume.host[count.index]
+    aws_volume_attachment.host[count.index]
+    aws_eip.host[count.index]
+  ]
+
   provisioner "ansible" {
     plays {
       playbook {
         file_path = "${path.cwd}/ansible/bootstrap.yml"
       }
 
-      hosts  = [self.public_ip]
+      hosts  = [ aws_eip.host[count.index].public_ip ]
       groups = local.groups
 
       extra_vars = {
-        hostname         = self.tags.Name
+        hostname         = aws_instance.host[count.index].tags.Name
         ansible_ssh_user = var.ssh_user
         data_center      = local.data_center
         stage            = local.stage
@@ -168,7 +185,7 @@ resource "cloudflare_record" "host" {
   zone_id = var.cf_zone_id
   count   = var.host_count
   name    = aws_instance.host[count.index].tags.Name
-  value   = aws_instance.host[count.index].public_ip
+  value   = aws_eip.host[count.index].public_ip
   type    = "A"
   ttl     = 300
 }

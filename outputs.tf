@@ -1,5 +1,5 @@
 locals {
-  public_ips = aws_instance.host[*].public_ip
+  public_ips = aws_eip.host[*].public_ip
   hostnames  = aws_instance.host[*].tags.Name
 }
 
