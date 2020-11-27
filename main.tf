@@ -155,10 +155,10 @@ resource "null_resource" "host" {
 
   /* Make sure everything is in place before bootstrapping. */
   depends_on = [
-    aws_instance.host[count.index]
-    aws_ebs_volume.host[count.index]
-    aws_volume_attachment.host[count.index]
-    aws_eip.host[count.index]
+    aws_instance.host,
+    aws_ebs_volume.host,
+    aws_volume_attachment.host,
+    aws_eip.host,
   ]
 
   provisioner "ansible" {
