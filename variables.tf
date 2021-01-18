@@ -40,6 +40,13 @@ variable data_vol_type {
   default     = "standard" # standard, gp2, io1, sc1, st1"
 }
 
+/* WARNING: IOPS to volume size ration maximum is 50. */
+variable data_vol_iops {
+  description = "Amount of IOPS to provision for the disk. Valid io1 or io2."
+  type        = string
+  default     = 1000
+}
+
 /* IMAGE ----------------------------------------*/
 
 variable image_name {

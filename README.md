@@ -22,8 +22,9 @@ module "amazon-web-services" {
   * `instance_type` - Type of host to create. (default: `t2.micro`)
   * `zone` - Availability Zone in which the instance will be created. (default: `eu-central-1a`)
   * `root_vol_size` - Size in GiB of system rot volume. (default: 10 GB)
-  * `data_vol_size` - Size in GiB of an extra volume to attach to the instance. (default: 0)
+  * `data_vol_size` - Size in GiB of an extra volume to attach to the instance. (default: `0`)
   * `data_vol_type` - Type of the data volume: `standard`, `gp2`, `io1`, `sc1`, `st1`. (default: `standard`)
+  * `data_vol_iops` - Amount of IOPS to provision for the disk. Valid io1 or io2. (default: `1000`)
 * __General__
   * `name` - Prefix of hostname before index. (default: `node`)
   * `group` - Name of Ansible group to add hosts to.

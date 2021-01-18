@@ -119,6 +119,10 @@ resource "aws_ebs_volume" "host" {
 
   size = var.data_vol_size
   type = var.data_vol_type
+  iops = (
+    var.data_vol_type == "io1" || var.data_vol_type == "io2" ?
+    var.data_vol_iops : 0
+  )
 
   count = (var.data_vol_size == 0 ? 0 : var.host_count)
 }
