@@ -145,6 +145,11 @@ resource "aws_eip" "host" {
 
   /* Data volume needs to be available for bootstrapping */
   depends_on = [ aws_volume_attachment.host ]
+
+  /* In case we care about the elastic IP. */
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 /* Run Ansible here here to make use of the Elastic IP attached to the host. */
