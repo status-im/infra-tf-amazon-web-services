@@ -7,7 +7,7 @@ locals {
   groups = distinct([local.data_center, "${var.env}.${local.stage}", var.group])
   /* always add SSH, Tinc, Netdata, and Consul to allowed ports */
   open_tcp_ports  = concat(["22", "655", "8000", "8301"], var.open_tcp_ports)
-  open_udp_ports  = concat(["655", "8301"], var.open_udp_ports)
+  open_udp_ports  = concat(["51820", "655", "8301"], var.open_udp_ports)
 }
 
 /* the image needs to be queried */
