@@ -1,6 +1,5 @@
 locals {
   public_ips = aws_eip.host[*].public_ip
-  hostnames  = aws_instance.host[*].tags.Name
 }
 
 output "public_ips" {

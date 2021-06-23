@@ -1,13 +1,15 @@
 locals {
-  stage            = var.stage != "" ? var.stage : terraform.workspace
-  data_center      = "${var.provider_name}-${var.zone}"
-  host_suffix      = "${local.data_center}.${var.env}.${local.stage}"
-  host_full_suffix = "${local.host_suffix}.${var.domain}"
-  /* got to add some default groups */
-  groups = distinct([local.data_center, "${var.env}.${local.stage}", var.group])
+  stage = var.stage != "" ? var.stage : terraform.workspace
+  dc    = "${var.provider_name}-${var.zone}"
+  /* Got to add some default groups. */
+  groups = distinct([local.dc, "${var.env}.${local.stage}", var.group])
   /* always add SSH, Tinc, Netdata, and Consul to allowed ports */
-  open_tcp_ports  = concat(["22", "655", "8000", "8301"], var.open_tcp_ports)
-  open_udp_ports  = concat(["51820", "655", "8301"], var.open_udp_ports)
+  open_tcp_ports = concat(["22", "655", "8000", "8301"], var.open_tcp_ports)
+  open_udp_ports = concat(["51820", "655", "8301"], var.open_udp_ports)
+  /* pre-generated list of hostnames */
+  hostnames = [for i in range(1, var.host_count+1): 
+    "${var.name}-${format("%02d", i)}.${local.dc}.${var.env}.${local.stage}"
+  ]
 }
 
 /* the image needs to be queried */
@@ -34,7 +36,7 @@ resource "aws_security_group" "host" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
-  
+
   /* always enable SSH */
   ingress {
     from_port   = 22
@@ -55,7 +57,7 @@ resource "aws_security_group" "host" {
       to_port = tonumber(
         length(split("-", port.value)) > 1 ? split("-", port.value)[1] : port.value
       )
-      protocol  = "tcp"
+      protocol    = "tcp"
       cidr_blocks = ["0.0.0.0/0"]
     }
   }
@@ -72,7 +74,7 @@ resource "aws_security_group" "host" {
       to_port = tonumber(
         length(split("-", port.value)) > 1 ? split("-", port.value)[1] : port.value
       )
-      protocol  = "udp"
+      protocol    = "udp"
       cidr_blocks = ["0.0.0.0/0"]
     }
   }
@@ -88,7 +90,7 @@ resource "aws_instance" "host" {
 
   /* Add provided Security Group if available */
   vpc_security_group_ids = concat(
-    [ aws_security_group.host.id ],
+    [aws_security_group.host.id],
     (var.secgroup_id != "" ? [var.secgroup_id] : [])
   )
 
@@ -97,20 +99,20 @@ resource "aws_instance" "host" {
   }
 
   tags = {
-    Name  = "${var.name}-${format("%02d", count.index+1)}.${local.host_suffix}"
-    Fqdn  = "${var.name}-${format("%02d", count.index+1)}.${local.host_full_suffix}"
+    Name  = local.hostnames[count.index]
+    Fqdn  = "${local.hostnames[count.index]}.${var.domain}"
     Fleet = "${var.env}.${local.stage}"
   }
-  
+
   /* for snapshots through lifecycle policy */
   volume_tags = {
+    Name  = local.hostnames[count.index]
     Fleet = "${var.env}.${local.stage}"
-    Name = "${var.name}-${format("%02d", count.index+1)}.${local.host_suffix}"
   }
 
   /* Ignore changes to disk image */
   lifecycle {
-    ignore_changes = [ ami ]
+    ignore_changes = [ami]
   }
 }
 
@@ -140,11 +142,11 @@ resource "aws_eip" "host" {
   count    = var.host_count
 
   tags = {
-    Name = "${var.name}-${format("%02d", count.index+1)}.${local.host_suffix}"
+    Name = local.hostnames[count.index]
   }
 
   /* Data volume needs to be available for bootstrapping */
-  depends_on = [ aws_volume_attachment.host ]
+  depends_on = [aws_volume_attachment.host]
 
   /* In case we care about the elastic IP. */
   lifecycle {
@@ -159,7 +161,7 @@ resource "null_resource" "host" {
   /* Trigger bootstrapping on host or public IP change. */
   triggers = {
     instance_id = aws_instance.host[count.index].id
-    eip_id = aws_eip.host[count.index].id
+    eip_id      = aws_eip.host[count.index].id
   }
 
   /* Make sure everything is in place before bootstrapping. */
@@ -176,15 +178,15 @@ resource "null_resource" "host" {
         file_path = "${path.cwd}/ansible/bootstrap.yml"
       }
 
-      hosts  = [ aws_eip.host[count.index].public_ip ]
+      hosts  = [aws_eip.host[count.index].public_ip]
       groups = local.groups
 
       extra_vars = {
-        hostname         = aws_instance.host[count.index].tags.Name
-        ansible_ssh_user = var.ssh_user
-        data_center      = local.data_center
-        stage            = local.stage
-        env              = var.env
+        hostname     = aws_instance.host[count.index].tags.Name
+        ansible_user = var.ssh_user
+        data_center  = local.dc
+        stage        = local.stage
+        env          = var.env
       }
     }
   }
@@ -211,7 +213,7 @@ resource "ansible_host" "host" {
     hostname     = aws_instance.host[count.index].tags.Name
     region       = aws_instance.host[count.index].availability_zone
     dns_entry    = aws_instance.host[count.index].tags.Fqdn
-    data_center  = local.data_center
+    data_center  = local.dc
     dns_domain   = var.domain
     env          = var.env
     stage        = local.stage
