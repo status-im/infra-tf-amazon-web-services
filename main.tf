@@ -3,9 +3,9 @@ locals {
   dc    = "${var.provider_name}-${var.zone}"
   /* Got to add some default groups. */
   groups = distinct([local.dc, "${var.env}.${local.stage}", var.group])
-  /* always add SSH, Tinc, Netdata, and Consul to allowed ports */
-  open_tcp_ports = concat(["22", "655", "8000", "8301"], var.open_tcp_ports)
-  open_udp_ports = concat(["51820", "655", "8301"], var.open_udp_ports)
+  /* always add SSH, WireGuard, and Consul to allowed ports */
+  open_tcp_ports = concat(["22", "8301"], var.open_tcp_ports)
+  open_udp_ports = concat(["51820", "8301"], var.open_udp_ports)
   /* pre-generated list of hostnames */
   hostnames = [for i in range(1, var.host_count+1): 
     "${var.name}-${format("%02d", i)}.${local.dc}.${var.env}.${local.stage}"
