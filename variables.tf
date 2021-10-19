@@ -14,7 +14,7 @@ variable "host_count" {
   default     = 1
 }
 
-variable "instance_type" {
+variable "type" {
   description = "Name of instance type to use"
   type        = string
   default     = "t2.micro"

@@ -81,7 +81,7 @@ resource "aws_security_group" "host" {
 }
 
 resource "aws_instance" "host" {
-  instance_type     = var.instance_type
+  instance_type     = var.type
   availability_zone = var.zone
   count             = var.host_count
   ami               = data.aws_ami.ubuntu.id
