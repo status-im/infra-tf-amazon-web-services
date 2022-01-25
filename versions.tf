@@ -8,7 +8,7 @@ terraform {
     }
     aws = {
       source  = "hashicorp/aws"
-      version = "= 3.46.0"
+      version = "= 3.73.0"
     }
     ansible = {
       source  = "nbering/ansible"
