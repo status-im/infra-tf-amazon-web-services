@@ -1,5 +1,5 @@
 locals {
-  public_ips = aws_eip.host[*].public_ip
+  public_ips = [for a in aws_eip.host : a.public_ip]
 }
 
 output "public_ips" {

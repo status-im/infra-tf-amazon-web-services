@@ -7,7 +7,7 @@ locals {
   open_tcp_ports = concat(["22", "8301"], var.open_tcp_ports)
   open_udp_ports = concat(["51820", "8301"], var.open_udp_ports)
   /* pre-generated list of hostnames */
-  hostnames = [for i in range(1, var.host_count+1): 
+  hostnames = [for i in range(1, var.host_count + 1) :
     "${var.name}-${format("%02d", i)}.${local.dc}.${var.env}.${local.stage}"
   ]
 }
@@ -81,12 +81,14 @@ resource "aws_security_group" "host" {
 }
 
 resource "aws_instance" "host" {
-  instance_type     = var.type
+  for_each = toset(local.hostnames)
+
   availability_zone = var.zone
-  count             = var.host_count
-  ami               = data.aws_ami.ubuntu.id
-  key_name          = var.keypair_name
-  subnet_id         = var.subnet_id
+
+  instance_type = var.type
+  ami           = data.aws_ami.ubuntu.id
+  key_name      = var.keypair_name
+  subnet_id     = var.subnet_id
 
   /* Add provided Security Group if available */
   vpc_security_group_ids = concat(
@@ -99,14 +101,14 @@ resource "aws_instance" "host" {
   }
 
   tags = {
-    Name  = local.hostnames[count.index]
-    Fqdn  = "${local.hostnames[count.index]}.${var.domain}"
+    Name  = each.key
+    Fqdn  = "${each.key}.${var.domain}"
     Fleet = "${var.env}.${local.stage}"
   }
 
   /* for snapshots through lifecycle policy */
   volume_tags = {
-    Name  = local.hostnames[count.index]
+    Name  = each.key
     Fleet = "${var.env}.${local.stage}"
   }
 
@@ -117,6 +119,8 @@ resource "aws_instance" "host" {
 }
 
 resource "aws_ebs_volume" "host" {
+  for_each = toset([ for h in local.hostnames : h if var.data_vol_size > 0 ])
+
   availability_zone = var.zone
 
   size = var.data_vol_size
@@ -125,28 +129,24 @@ resource "aws_ebs_volume" "host" {
     var.data_vol_type == "io1" || var.data_vol_type == "io2" ?
     var.data_vol_iops : 0
   )
-
-  count = (var.data_vol_size == 0 ? 0 : var.host_count)
 }
 
 resource "aws_volume_attachment" "host" {
-  device_name = "/dev/sdf"
-  volume_id   = aws_ebs_volume.host[count.index].id
-  instance_id = aws_instance.host[count.index].id
+  for_each = { for k,v in aws_instance.host : k => v if var.data_vol_size > 0 }
 
-  count = (var.data_vol_size == 0 ? 0 : var.host_count)
+  device_name = "/dev/sdf"
+  volume_id   = aws_ebs_volume.host[each.key].id
+  instance_id = each.value.id
 }
 
 resource "aws_eip" "host" {
-  instance = aws_instance.host[count.index].id
-  count    = var.host_count
+  for_each = aws_instance.host
+
+  instance = each.value.id
 
   tags = {
-    Name = local.hostnames[count.index]
+    Name = each.key
   }
-
-  /* Data volume needs to be available for bootstrapping */
-  depends_on = [aws_volume_attachment.host]
 
   /* In case we care about the elastic IP. */
   lifecycle {
@@ -156,12 +156,12 @@ resource "aws_eip" "host" {
 
 /* Run Ansible here here to make use of the Elastic IP attached to the host. */
 resource "null_resource" "host" {
-  count = var.host_count
+  for_each = aws_instance.host
 
   /* Trigger bootstrapping on host or public IP change. */
   triggers = {
-    instance_id = aws_instance.host[count.index].id
-    eip_id      = aws_eip.host[count.index].id
+    instance_id = each.value.id
+    eip_id      = aws_eip.host[each.key].id
   }
 
   /* Make sure everything is in place before bootstrapping. */
@@ -178,11 +178,11 @@ resource "null_resource" "host" {
         file_path = "${path.cwd}/ansible/bootstrap.yml"
       }
 
-      hosts  = [aws_eip.host[count.index].public_ip]
+      hosts  = [aws_eip.host[each.key].public_ip]
       groups = local.groups
 
       extra_vars = {
-        hostname     = aws_instance.host[count.index].tags.Name
+        hostname     = each.value.tags.Name
         ansible_user = var.ssh_user
         data_center  = local.dc
         stage        = local.stage
@@ -193,26 +193,28 @@ resource "null_resource" "host" {
 }
 
 resource "cloudflare_record" "host" {
+  for_each = aws_eip.host
+
   zone_id = var.cf_zone_id
-  count   = var.host_count
-  name    = aws_instance.host[count.index].tags.Name
-  value   = aws_eip.host[count.index].public_ip
+  name    = each.key
+  value   = each.value.public_ip
   type    = "A"
   ttl     = 300
 }
 
 /* this adds the host to the Terraform state for Ansible inventory */
 resource "ansible_host" "host" {
-  inventory_hostname = aws_instance.host[count.index].tags.Name
+  for_each = aws_instance.host
+
+  inventory_hostname = each.value.tags.Name
 
   groups = local.groups
-  count  = length(aws_instance.host)
 
   vars = {
-    ansible_host = aws_eip.host[count.index].public_ip
-    hostname     = aws_instance.host[count.index].tags.Name
-    region       = aws_instance.host[count.index].availability_zone
-    dns_entry    = aws_instance.host[count.index].tags.Fqdn
+    ansible_host = aws_eip.host[each.key].public_ip
+    hostname     = each.value.tags.Name
+    region       = each.value.availability_zone
+    dns_entry    = each.value.tags.Fqdn
     data_center  = local.dc
     dns_domain   = var.domain
     env          = var.env
