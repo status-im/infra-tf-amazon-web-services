@@ -114,7 +114,7 @@ resource "aws_instance" "host" {
 
   /* Ignore changes to disk image */
   lifecycle {
-    ignore_changes = [ami]
+    ignore_changes = [ami, key_name]
   }
 }
 
