@@ -37,3 +37,7 @@ module "amazon-web-services" {
   * `keypair_name` - User used to log in to instance (default: `root`)
   * `open_tcp_ports` - TCP port ranges to enable access from outside. Format: `N-N` (default: `[]`)
   * `open_udp_ports` - UDP port ranges to enable access from outside. Format: `N-N` (default: `[]`)
+* __Protection__
+  * `disable_api_stop` - Enables EC2 Instance Stop Protection. (default: `false`)
+  * `disable_api_termination` - Enables EC2 Instance Termination Protection. (default: `false`)
+  * `auto_recovery` - Automatic recovery behavior of the Instance. (default: `default`)

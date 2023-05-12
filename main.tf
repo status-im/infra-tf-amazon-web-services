@@ -112,6 +112,13 @@ resource "aws_instance" "host" {
     Fleet = "${var.env}.${local.stage}"
   }
 
+  /* Instance protection and recovery. */
+  disable_api_stop = var.disable_api_stop
+  disable_api_termination = var.disable_api_termination
+  maintenance_options {
+    auto_recovery = var.auto_recovery
+  }
+
   /* Ignore changes to disk image */
   lifecycle {
     ignore_changes = [ami, key_name]

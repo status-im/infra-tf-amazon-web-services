@@ -66,6 +66,29 @@ variable "ssh_user" {
   default     = "ubuntu"
 }
 
+/* PROTECTION -----------------------------------*/
+
+// https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/Stop_Start.html#Using_StopProtection
+variable "disable_api_stop" {
+  description = "Enables EC2 Instance Stop Protection."
+  type        = bool
+  default     = false
+}
+
+// https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/terminating-instances.html#Using_ChangingDisableAPITermination
+variable "disable_api_termination" {
+  description = "Enables EC2 Instance Termination Protection."
+  type        = bool
+  default     = false
+}
+
+// https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-recover.html
+variable "auto_recovery" {
+  description = "Automatic recovery behavior of the Instance."
+  type        = string
+  default     = "default" // or "disabled"
+}
+
 /* HOSTING --------------------------------------*/
 
 variable "zone" {
