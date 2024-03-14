@@ -205,13 +205,23 @@ resource "null_resource" "host" {
   }
 }
 
-resource "cloudflare_record" "host" {
+resource "cloudflare_record" "host_ipv4" {
   for_each = aws_eip.host
 
   zone_id = var.cf_zone_id
   name    = each.key
   value   = each.value.public_ip
   type    = "A"
+  ttl     = 300
+}
+
+resource "cloudflare_record" "host_ipv6" {
+  for_each = aws_instance.host
+
+  zone_id = var.cf_zone_id
+  name    = each.value.tags.Name
+  value   = each.value.ipv6_addresses[0]
+  type    = "AAAA"
   ttl     = 300
 }
 
