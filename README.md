@@ -29,7 +29,6 @@ module "amazon-web-services" {
   * `name` - Prefix of hostname before index. (default: `node`)
   * `group` - Name of Ansible group to add hosts to.
   * `env` - Environment for these hosts, affects DNS entries.
-  * `domain` - DNS Domain to update.
 * __Security__
   * `vpc_id` - ID of the VPC for instances.
   * `subnet_id` - ID of the Subnet for instances.
@@ -41,3 +40,6 @@ module "amazon-web-services" {
   * `disable_api_stop` - Enables EC2 Instance Stop Protection. (default: `false`)
   * `disable_api_termination` - Enables EC2 Instance Termination Protection. (default: `false`)
   * `auto_recovery` - Automatic recovery behavior of the Instance. (default: `default`)
+* __DNS__
+  * `cf_zone_id` - CloudFlare DNS domain zone ID. (ID for `status.im`)
+  * `domain` - DNS Domain for hostnames. (default: `status.im`)
