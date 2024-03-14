@@ -119,6 +119,12 @@ variable "subnet_id" {
   type        = string
 }
 
+variable "ipv6_address_count" {
+  description = "ID of the Subnet for instances"
+  type        = number
+  default     = 1
+}
+
 variable "secgroup_id" {
   description = "ID of the Security Group for instances"
   type        = string

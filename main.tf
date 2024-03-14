@@ -35,6 +35,7 @@ resource "aws_security_group" "host" {
     to_port     = 0
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
   }
 
   /* always enable SSH */
@@ -43,6 +44,7 @@ resource "aws_security_group" "host" {
     to_port     = 22
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
   }
 
   /* TCP */
@@ -59,6 +61,7 @@ resource "aws_security_group" "host" {
       )
       protocol    = "tcp"
       cidr_blocks = ["0.0.0.0/0"]
+      ipv6_cidr_blocks = ["::/0"]
     }
   }
 
@@ -76,6 +79,7 @@ resource "aws_security_group" "host" {
       )
       protocol    = "udp"
       cidr_blocks = ["0.0.0.0/0"]
+      ipv6_cidr_blocks = ["::/0"]
     }
   }
 }
@@ -112,6 +116,8 @@ resource "aws_instance" "host" {
     Fleet = "${var.env}.${local.stage}"
   }
 
+  /* IPv6 support */
+  ipv6_address_count = var.ipv6_address_count
   /* Instance protection and recovery. */
   disable_api_stop = var.disable_api_stop
   disable_api_termination = var.disable_api_termination
