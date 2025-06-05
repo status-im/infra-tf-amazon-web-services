@@ -198,6 +198,7 @@ resource "null_resource" "host" {
         hostname     = each.value.tags.Name
         ansible_user = var.ssh_user
         data_center  = local.dc
+        dns_domain   = var.domain
         stage        = local.stage
         env          = var.env
       }
