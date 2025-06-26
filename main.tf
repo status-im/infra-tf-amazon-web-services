@@ -91,8 +91,11 @@ resource "aws_instance" "host" {
 
   instance_type = var.type
   ami           = data.aws_ami.ubuntu.id
-  key_name      = var.keypair_name
   subnet_id     = var.subnet_id
+
+  user_data = templatefile("${path.module}/add_public_keys.sh.tpl", {
+    ssh_keys = join("\n", var.ssh_keys)
+  })
 
   /* Add provided Security Group if available */
   vpc_security_group_ids = concat(
