@@ -33,7 +33,6 @@ module "amazon-web-services" {
   * `vpc_id` - ID of the VPC for instances.
   * `subnet_id` - ID of the Subnet for instances.
   * `secgroup_id` - ID of the Security Group for instances.
-  * `keypair_name` - User used to log in to instance (default: `root`)
   * `open_tcp_ports` - TCP port ranges to enable access from outside. Format: `N-N` (default: `[]`)
   * `open_udp_ports` - UDP port ranges to enable access from outside. Format: `N-N` (default: `[]`)
 * __Protection__
