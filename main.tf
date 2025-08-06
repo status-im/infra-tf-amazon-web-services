@@ -128,9 +128,9 @@ resource "aws_instance" "host" {
     auto_recovery = var.auto_recovery
   }
 
-  /* Ignore changes to disk image */
+  /* Ignore changes to disk image and ssh keys*/
   lifecycle {
-    ignore_changes = [ami, key_name]
+    ignore_changes = [ami, user_data]
   }
 }
 
