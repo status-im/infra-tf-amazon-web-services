@@ -137,6 +137,11 @@ resource "aws_instance" "host" {
 resource "aws_ebs_volume" "host" {
   for_each = toset([ for h in local.hostnames : h if var.data_vol_size > 0 ])
 
+  tags = {
+    Name = "data-${each.key}"
+    Fleet = "${var.env}.${local.stage}"
+  }
+
   availability_zone = var.zone
 
   size = var.data_vol_size
