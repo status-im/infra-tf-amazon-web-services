@@ -56,7 +56,7 @@ variable "data_vol_iops" {
 variable "image_name" {
   description = "Name of AMI image to use."
   type        = string
-  default     = "ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-20260218"
+  default     = "ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-server-20260610"
   /* Use: aws ec2 describe-images --filters 'Name=name,Values=ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64*' | jq -r '.Images[].Name' */
 }
 
