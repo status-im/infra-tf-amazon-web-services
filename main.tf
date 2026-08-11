@@ -247,6 +247,7 @@ resource "ansible_host" "host" {
     hostname     = each.value.tags.Name
     region       = each.value.availability_zone
     dns_entry    = each.value.tags.Fqdn
+    host_type    = var.type
     data_center  = local.dc
     dns_domain   = var.domain
     env          = var.env
